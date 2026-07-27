@@ -1,3 +1,23 @@
 spring:
   application:
     name: Products
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+supabase:
+  storage:
+    url: ${SUPABASE_URL}/storage/v1
+    service-key: ${SUPABASE_SERVICE_ROLE_KEY}
+    bucket: ${SUPABASE_STORAGE_BUCKET:product-images}

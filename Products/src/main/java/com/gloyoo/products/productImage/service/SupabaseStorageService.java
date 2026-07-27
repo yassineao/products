@@ -3,6 +3,7 @@ package com.gloyoo.products.productImage.service;
 import com.gloyoo.products.productImage.client.SupabaseStorageClient;
 import com.gloyoo.products.productImage.config.SupabaseStorageProperties;
 import feign.Feign;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,16 +13,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class SupabaseStorageService {
+
     private final SupabaseStorageProperties supabaseStorageProperties;
+
     private final SupabaseStorageClient supabaseStorageClient;
 
-    public SupabaseStorageService(SupabaseStorageProperties supabaseStorageProperties) {
-        this.supabaseStorageProperties = supabaseStorageProperties;
-        this.supabaseStorageClient = Feign.builder()
-                .target(SupabaseStorageClient.class, getStorageUrl());
-    }
+
 
     public StoredImage uploadProductImage(UUID productId, MultipartFile file) {
         if (productId == null) {
@@ -47,6 +47,7 @@ public class SupabaseStorageService {
                     "Bearer " + supabaseStorageProperties.getServiceKey(),
                     supabaseStorageProperties.getServiceKey(),
                     getContentType(file),
+                    "true",
                     file.getBytes()
             );
         } catch (IOException exception) {
