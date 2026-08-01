@@ -1,26 +1,17 @@
 package com.gloyoo.products.category.controller;
 
 import com.gloyoo.products.category.dto.CategoryRequest;
-import com.gloyoo.products.category.entity.Category;
-import com.gloyoo.products.category.repository.CategoryRepository;
 import com.gloyoo.products.category.service.CategoryService;
 import jakarta.validation.Valid;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@Controller
 @RequestMapping("/category")
 public class CategoryController {
-    CategoryService categoryService;
+    private final CategoryService categoryService;
 
-    CategoryRepository categoryRepository;
-    public CategoryController(CategoryService categoryService, CategoryRepository categoryRepository) {
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
@@ -49,7 +40,7 @@ public class CategoryController {
 
     @GetMapping("/active")
     public ResponseEntity<?> getActiveCategories() {
-        return ResponseEntity.ok().body(categoryRepository.findAllByActive(true));
+        return ResponseEntity.ok().body(categoryService.getCategoryByActive());
     }
 
 

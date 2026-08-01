@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 )
 public interface SupabaseStorageClient {
 
-    @PostMapping("/object/{bucketName}/{objectPath}")
+    @PostMapping("/storage/v1/object/{bucketName}/{objectPath}")
     ResponseEntity<String> upload(
             @PathVariable("bucketName") String bucketName,
             @PathVariable("objectPath") String objectPath,

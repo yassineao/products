@@ -15,12 +15,13 @@ import java.util.UUID;
 )
 public class Category {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "category_id")
     private UUID id;
     @NonNull
     @Column(unique = true, nullable = false)
     private String name;
     private String description;
+    @Builder.Default
     private boolean active = false;
 }

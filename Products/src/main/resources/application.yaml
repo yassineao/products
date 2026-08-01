@@ -1,23 +1,37 @@
 spring:
   application:
     name: Products
+  config:
+    import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    username: myuser
-    password: secret
+    url: ${DATABASE_URL:${SUPABASE_DB_URL:jdbc:postgresql://localhost:5432/mydatabase}}
+    username: ${DATABASE_USERNAME:${SUPABASE_DB_USERNAME:myuser}}
+    password: ${DATABASE_PASSWORD:${SUPABASE_DB_PASSWORD:secret}}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 0
+      connection-timeout: 10000
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+    open-in-view: false
   flyway:
     enabled: true
+    default-schema: public
+    schemas:
+      - public
+    table: flyway_schema_history_products
+    baseline-on-migrate: true
+    baseline-version: 0
+    create-schemas: false
     locations: classpath:db/migration
 
 supabase:
   storage:
-    url: ${SUPABASE_URL}/storage/v1
-    service-key: ${SUPABASE_SERVICE_ROLE_KEY}
+    url: ${SUPABASE_URL:http://localhost}
+    service-key: ${SUPABASE_SERVICE_ROLE_KEY:${SUPABASE_SECRET_KEY:}}
     bucket: ${SUPABASE_STORAGE_BUCKET:product-images}

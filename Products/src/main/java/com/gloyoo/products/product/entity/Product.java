@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,11 +20,12 @@ import java.util.UUID;
 @Table(name="products")
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String name;
     private String description;
-    private double price;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal price;
     private int quantity;
     private String[] tags;
     private Boolean active;
