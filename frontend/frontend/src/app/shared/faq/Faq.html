@@ -1,0 +1,43 @@
+<section class="bg-terracotta/10 px-5 py-24 text-dark-brown sm:px-8">
+  <div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+    <div>
+      <div class="mb-4 flex items-center gap-3">
+        <span class="h-px w-10 bg-warm-gold"></span>
+        <span class="text-xs font-bold tracking-[0.24em] text-burgundy uppercase">Need to know</span>
+      </div>
+      <h2 class="font-serif text-4xl font-semibold text-moroccan-green sm:text-5xl">Questions, answered.</h2>
+      <p class="mt-5 max-w-sm leading-7 text-dark-brown/65">Everything about our craft, delivery and caring for your Maison Atlas pieces.</p>
+    </div>
+
+    <div class="divide-y divide-warm-gold/35 border-y border-warm-gold/35">
+      @for (faq of faqs; track faq.question; let index = $index) {
+        <article>
+          <button
+            class="flex w-full cursor-pointer items-center justify-between gap-6 bg-transparent py-6 text-left text-dark-brown"
+            type="button"
+            [attr.aria-expanded]="openIndex() === index"
+            [attr.aria-controls]="'faq-answer-' + index"
+            (click)="toggle(index)"
+          >
+            <span class="font-serif text-lg font-semibold sm:text-xl">{{ faq.question }}</span>
+            <span class="grid size-8 shrink-0 place-items-center rounded-full border border-warm-gold text-moroccan-green">
+              {{ openIndex() === index ? '−' : '+' }}
+            </span>
+          </button>
+          <div
+            class="grid transition-[grid-template-rows,opacity] duration-300"
+            [class.grid-rows-[1fr]]="openIndex() === index"
+            [class.opacity-100]="openIndex() === index"
+            [class.grid-rows-[0fr]]="openIndex() !== index"
+            [class.opacity-0]="openIndex() !== index"
+            [id]="'faq-answer-' + index"
+          >
+            <div class="overflow-hidden">
+              <p class="max-w-xl pb-6 leading-7 text-dark-brown/65">{{ faq.answer }}</p>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>

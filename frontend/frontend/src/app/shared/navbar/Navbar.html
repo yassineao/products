@@ -1,0 +1,98 @@
+<nav
+  class="fixed inset-x-0 top-0 z-[100] border-b border-warm-gold/30 bg-moroccan-green/95 font-sans text-ivory shadow-lg shadow-dark-brown/10 backdrop-blur-xl"
+  aria-label="Main navigation"
+>
+  <div class="w-full bg-warm-gold px-4 py-2 text-center text-xs font-semibold tracking-wide text-ivory sm:text-sm">
+    <p>Complimentary delivery on orders over $50 · 20% off your first purchase</p>
+  </div>
+  <div class="relative mx-auto flex min-h-[68px] w-full max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+    <a
+      class="flex items-center gap-3 text-lg font-bold tracking-tight text-ivory no-underline focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold"
+      routerLink="/"
+      aria-label="Maison Atlas home"
+      (click)="closeMenu()"
+    >
+      <img class="size-[30px]" src="/favicon.ico" alt="" />
+      <span class="max-[420px]:hidden">Maison Atlas</span>
+    </a>
+
+    <div class="flex items-center gap-2.5">
+      <a
+        class="rounded-full border border-warm-gold bg-warm-gold px-4 py-2.5 text-sm font-bold text-dark-brown no-underline transition hover:-translate-y-px hover:bg-ivory focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold active:scale-95 motion-reduce:transition-none"
+        routerLink="/shop"
+        (click)="closeMenu()"
+      >
+        Shop now
+      </a>
+      <button
+        class="grid size-[42px] cursor-pointer place-items-center rounded-full border border-warm-gold/40 bg-ivory/10 p-0 text-ivory hover:bg-ivory/20 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold md:hidden"
+        type="button"
+        aria-controls="navbar-menu"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-label]="menuOpen() ? 'Close main menu' : 'Open main menu'"
+        (click)="toggleMenu()"
+      >
+        @if (menuOpen()) {
+          <svg class="size-[22px] fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        } @else {
+          <svg class="size-[22px] fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        }
+      </button>
+    </div>
+
+    <div
+      id="navbar-menu"
+      class="absolute top-[calc(100%+1px)] right-3 left-3 rounded-2xl border border-warm-gold/30 bg-moroccan-green/98 p-2 shadow-2xl shadow-dark-brown/40 backdrop-blur-xl transition-[opacity,transform,visibility] duration-150 motion-reduce:transition-none md:visible md:top-auto md:right-auto md:left-1/2 md:-translate-x-1/2 md:translate-y-0 md:border-0 md:bg-transparent md:p-0 md:opacity-100 md:shadow-none md:backdrop-blur-none"
+      [class.invisible]="!menuOpen()"
+      [class.-translate-y-2]="!menuOpen()"
+      [class.opacity-0]="!menuOpen()"
+      [class.visible]="menuOpen()"
+      [class.translate-y-0]="menuOpen()"
+      [class.opacity-100]="menuOpen()"
+    >
+      <ul class="m-0 flex list-none flex-col items-stretch gap-0.5 p-0 md:flex-row md:items-center md:gap-1.5">
+        <li>
+          <a
+            class="block rounded-[10px] px-3.5 py-3 text-sm font-semibold text-ivory/70 no-underline transition-colors hover:bg-warm-gold/20 hover:text-ivory focus-visible:bg-warm-gold/20 focus-visible:text-ivory focus-visible:outline-2 focus-visible:outline-warm-gold motion-reduce:transition-none md:rounded-full md:px-[13px] md:py-[9px]"
+            routerLink="/"
+            routerLinkActive="bg-warm-gold/20 text-ivory"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            (click)="closeMenu()"
+          >Home</a>
+        </li>
+        <li>
+          <a
+            class="block rounded-[10px] px-3.5 py-3 text-sm font-semibold text-ivory/70 no-underline transition-colors hover:bg-warm-gold/20 hover:text-ivory focus-visible:bg-warm-gold/20 focus-visible:text-ivory focus-visible:outline-2 focus-visible:outline-warm-gold motion-reduce:transition-none md:rounded-full md:px-[13px] md:py-[9px]"
+            routerLink="/about"
+            routerLinkActive="bg-warm-gold/20 text-ivory"
+            ariaCurrentWhenActive="page"
+            (click)="closeMenu()"
+          >About</a>
+        </li>
+        <li>
+          <a
+            class="block rounded-[10px] px-3.5 py-3 text-sm font-semibold text-ivory/70 no-underline transition-colors hover:bg-warm-gold/20 hover:text-ivory focus-visible:bg-warm-gold/20 focus-visible:text-ivory focus-visible:outline-2 focus-visible:outline-warm-gold motion-reduce:transition-none md:rounded-full md:px-[13px] md:py-[9px]"
+            routerLink="/shop"
+            routerLinkActive="bg-warm-gold/20 text-ivory"
+            ariaCurrentWhenActive="page"
+            (click)="closeMenu()"
+          >Shop</a>
+        </li>
+        <li>
+          <a
+            class="block rounded-[10px] px-3.5 py-3 text-sm font-semibold text-ivory/70 no-underline transition-colors hover:bg-warm-gold/20 hover:text-ivory focus-visible:bg-warm-gold/20 focus-visible:text-ivory focus-visible:outline-2 focus-visible:outline-warm-gold motion-reduce:transition-none md:rounded-full md:px-[13px] md:py-[9px]"
+            routerLink="/contact"
+            routerLinkActive="bg-warm-gold/20 text-ivory"
+            ariaCurrentWhenActive="page"
+            (click)="closeMenu()"
+          >Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

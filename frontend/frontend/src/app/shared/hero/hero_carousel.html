@@ -1,0 +1,81 @@
+@if (items.length && activeItem(); as current) {
+  <section
+    class="focus-rail py-12"
+    tabindex="0"
+    aria-roledescription="carousel"
+    aria-label="Featured stories"
+    (wheel)="onWheel($event)"
+  >
+    <div class="ambience" aria-hidden="true">
+      <img [src]="current.imageSrc" alt="" />
+      <div></div>
+    </div>
+
+    <div class="stage">
+      <div
+        class="rail"
+        (pointerdown)="onPointerDown($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)"
+      >
+        @for (offset of offsets; track offset) {
+          @if (isVisible(offset)) {
+            <button
+              class="card"
+              type="button"
+              [class.center]="offset === 0"
+              [style.transform]="cardTransform(offset)"
+              [style.filter]="cardFilter(offset)"
+              [style.opacity]="cardOpacity(offset)"
+              [style.z-index]="cardZIndex(offset)"
+              [attr.aria-label]="offset === 0 ? itemAt(offset).title : 'Show ' + itemAt(offset).title"
+              [attr.aria-current]="offset === 0 ? 'true' : null"
+              (click)="selectOffset(offset)"
+            >
+              <img [src]="itemAt(offset).imageSrc" [alt]="itemAt(offset).title" draggable="false" />
+              <span class="card-light"></span>
+              <span class="card-shade"></span>
+            </button>
+          }
+        }
+      </div>
+
+      <div class="details">
+        <div class="copy" [attr.data-active-id]="current.id">
+          @if (current.meta) {
+            <span class="meta">{{ current.meta }}</span>
+          }
+          <h2>{{ current.title }}</h2>
+          @if (current.description) {
+            <p>{{ current.description }}</p>
+          }
+        </div>
+
+        <div class="actions">
+          <div class="pager">
+            <button type="button" aria-label="Previous story" (click)="previous()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <span>{{ active() + 1 }} / {{ items.length }}</span>
+            <button type="button" aria-label="Next story" (click)="next()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+
+          @if (current.href) {
+            <a class="explore" [href]="current.href">
+              Explore
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 17 17 7M7 7h10v10" />
+              </svg>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+}

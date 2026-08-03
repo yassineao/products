@@ -1,0 +1,324 @@
+:host {
+  display: block;
+  color: #f8f1e5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.focus-rail {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 700px;
+  /*overflow: hidden;*/
+  background: #0f5132;
+  outline: none;
+  user-select: none;
+}
+
+.ambience,
+.ambience > div {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ambience img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  filter: blur(64px) saturate(2);
+  transform: scale(1.12);
+  transition: opacity 0.8s ease;
+}
+
+.ambience > div {
+  background: linear-gradient(to top, #0f5132 5%, rgb(15 81 50 / 62%) 55%, transparent);
+}
+
+.stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 48px 32px;
+}
+
+.rail {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1152px;
+  height: 390px;
+  margin: 0 auto;
+  perspective: 1200px;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.rail:active {
+  cursor: grabbing;
+}
+
+.card {
+  position: absolute;
+  width: 300px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border: 1px solid rgb(200 155 60 / 35%);
+  border-radius: 18px;
+  background: #33251f;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 70%);
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1), opacity 420ms ease, filter 520ms ease,
+    box-shadow 300ms ease;
+  cursor: pointer;
+}
+
+.card.center {
+  box-shadow: 0 25px 60px -12px rgb(255 255 255 / 12%);
+}
+
+.card:focus-visible {
+  outline: 2px solid #c89b3c;
+  outline-offset: 4px;
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.card-light,
+.card-shade {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.card-light {
+  background: linear-gradient(to bottom, rgb(255 255 255 / 10%), transparent 42%);
+}
+
+.card-shade {
+  background: rgb(0 0 0 / 10%);
+  mix-blend-mode: multiply;
+}
+
+.details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 896px;
+  min-height: 132px;
+  margin: 48px auto 0;
+  gap: 32px;
+}
+
+.copy {
+  flex: 1;
+  animation: reveal-copy 300ms ease both;
+}
+
+.meta {
+  color: #c89b3c;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 8px 0;
+  color: #f8f1e5;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+p {
+  max-width: 448px;
+  margin: 0;
+  color: rgb(248 241 229 / 72%);
+  line-height: 1.55;
+}
+
+.actions,
+.pager {
+  display: flex;
+  align-items: center;
+}
+
+.actions {
+  gap: 16px;
+}
+
+.pager {
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgb(200 155 60 / 32%);
+  border-radius: 999px;
+  background: rgb(51 37 31 / 78%);
+  backdrop-filter: blur(12px);
+}
+
+.pager button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: rgb(248 241 229 / 68%);
+  background: transparent;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, transform 100ms ease;
+}
+
+.pager button:hover {
+  color: #f8f1e5;
+  background: rgb(200 155 60 / 20%);
+}
+
+.pager button:active,
+.explore:active {
+  transform: scale(0.95);
+}
+
+.pager span {
+  min-width: 44px;
+  color: rgb(248 241 229 / 55%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.explore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  color: #33251f;
+  background: #c89b3c;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 180ms ease;
+}
+
+.explore:hover {
+  transform: scale(1.05);
+}
+
+.explore svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 180ms ease;
+}
+
+.explore:hover svg {
+  transform: translate(2px, -2px);
+}
+
+@keyframes reveal-copy {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 800px) {
+  .focus-rail {
+    min-height: 720px;
+  }
+
+  .stage {
+    padding: 36px 16px;
+  }
+
+  .rail {
+    height: 350px;
+  }
+
+  .card {
+    width: 260px;
+  }
+
+  .details {
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 36px;
+    text-align: center;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .focus-rail {
+    min-height: 690px;
+  }
+
+  .rail {
+    height: 320px;
+  }
+
+  .card {
+    width: 220px;
+  }
+
+  .actions {
+    gap: 10px;
+  }
+
+  .explore {
+    padding-inline: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .copy,
+  .ambience img,
+  .explore,
+  .pager button {
+    animation: none;
+    transition: none;
+  }
+}
