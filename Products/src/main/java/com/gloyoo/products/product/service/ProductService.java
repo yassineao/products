@@ -3,9 +3,12 @@ package com.gloyoo.products.product.service;
 import com.gloyoo.products.category.entity.Category;
 import com.gloyoo.products.category.repository.CategoryRepository;
 import com.gloyoo.products.product.dto.ProductRequest;
+import com.gloyoo.products.product.dto.ProductResponse;
 import com.gloyoo.products.product.entity.Product;
 import com.gloyoo.products.product.repository.ProductRepository;
+import com.gloyoo.products.productImage.service.ProductImageService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,10 +17,16 @@ import java.util.UUID;
 public class ProductService {
     final private ProductRepository productRepository;
     final private CategoryRepository categoryRepository;
+    final private ProductImageService productImageService;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(
+            ProductRepository productRepository,
+            CategoryRepository categoryRepository,
+            ProductImageService productImageService
+    ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productImageService = productImageService;
     }
 
     public void AddProduct(ProductRequest productRequest) {
@@ -38,7 +47,7 @@ public class ProductService {
 
     public void DeleteProduct(UUID id) {
         Product product = findById(id);
-
+        productImageService.DeleteProductImagesByProduct(id);
         productRepository.delete(product);
     }
 
@@ -57,12 +66,23 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public List<Product> getActiveProducts() {
-        return productRepository.findAllByActive(true);
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getActiveProducts() {
+        return productRepository.findAllByActive(true).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getProductById(UUID id) {
+        return toResponse(findById(id));
     }
 
     public Product findById(UUID id) {
@@ -79,5 +99,21 @@ public class ProductService {
         }
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+    }
+
+    private ProductResponse toResponse(Product product) {
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getQuantity(),
+                product.getTags(),
+                product.getActive(),
+                product.getCategory(),
+                product.getImages().stream()
+                        .map(productImageService::toResponse)
+                        .toList()
+        );
     }
 }

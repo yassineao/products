@@ -3,9 +3,11 @@ package com.gloyoo.products.productImage.service;
 import com.gloyoo.products.product.entity.Product;
 import com.gloyoo.products.product.repository.ProductRepository;
 import com.gloyoo.products.productImage.dto.ProductImageRequest;
+import com.gloyoo.products.productImage.dto.ProductImageResponse;
 import com.gloyoo.products.productImage.entity.ProductImage;
 import com.gloyoo.products.productImage.repository.ProductImageRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -32,24 +34,7 @@ public class ProductImageService {
         this.supabaseStorageService = supabaseStorageService;
     }
 
-    public void AddProductImage(ProductImageRequest productImageRequest) {
-        Product product = getProduct(productImageRequest.productId());
-
-        ProductImage productImage = ProductImage.builder()
-                .bucketName(productImageRequest.bucketName())
-                .objectPath(productImageRequest.objectPath())
-                .width(productImageRequest.width())
-                .height(productImageRequest.height())
-                .publicUrl(productImageRequest.publicUrl())
-                .altText(productImageRequest.altText())
-                .mainImage(productImageRequest.mainImage())
-                .product(product)
-                .build();
-
-        productImageRepository.save(productImage);
-    }
-
-    public ProductImage UploadProductImage(UUID productId, MultipartFile file, String altText, Boolean mainImage) {
+    public ProductImageResponse UploadProductImage(UUID productId, MultipartFile file, String altText, Boolean mainImage) {
         Product product = getProduct(productId);
         SupabaseStorageService.StoredImage storedImage = supabaseStorageService.uploadProductImage(productId, file);
         ImageSize imageSize = getImageSize(file);
@@ -59,44 +44,64 @@ public class ProductImageService {
                 .objectPath(storedImage.objectPath())
                 .width(imageSize.width())
                 .height(imageSize.height())
-                .publicUrl(storedImage.publicUrl())
                 .altText(altText)
                 .mainImage(mainImage)
-                .product(product)
+                .products(List.of(product))
                 .build();
 
-        return productImageRepository.save(productImage);
+        return toResponse(productImageRepository.save(productImage));
     }
 
     public void UpdateProductImage(UUID id, ProductImageRequest productImageRequest) {
         ProductImage productImage = findById(id);
-        Product product = getProduct(productImageRequest.productId());
-
-        productImage.setBucketName(productImageRequest.bucketName());
-        productImage.setObjectPath(productImageRequest.objectPath());
-        productImage.setWidth(productImageRequest.width());
-        productImage.setHeight(productImageRequest.height());
-        productImage.setPublicUrl(productImageRequest.publicUrl());
         productImage.setAltText(productImageRequest.altText());
         productImage.setMainImage(productImageRequest.mainImage());
-        productImage.setProduct(product);
 
         productImageRepository.save(productImage);
     }
 
     public void DeleteProductImage(UUID id) {
         ProductImage productImage = findById(id);
-
+        supabaseStorageService.deleteProductImage(productImage.getBucketName(), productImage.getObjectPath());
         productImageRepository.delete(productImage);
     }
 
-    public List<ProductImage> getAllProductImages() {
-        return productImageRepository.findAll();
+    @Transactional
+    public void DeleteProductImagesByProduct(UUID productId) {
+        List<ProductImage> productImages = productImageRepository.findAllByProductsId(productId);
+
+        productImages.forEach(productImage -> {
+            productImage.getProducts().removeIf(product -> product.getId().equals(productId));
+            if (!productImage.getProducts().isEmpty()) {
+                productImageRepository.save(productImage);
+                return;
+            }
+
+            // Delete the stored file only when no other product uses the image.
+
+                supabaseStorageService.deleteProductImage(
+                        productImage.getBucketName(),
+                        productImage.getObjectPath()
+                );
+            productImageRepository.delete(productImage);
+        });
     }
 
-    public List<ProductImage> getProductImagesByProduct(UUID productId) {
+    public List<ProductImageResponse> getAllProductImages() {
+        return productImageRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<ProductImageResponse> getProductImagesByProduct(UUID productId) {
         getProduct(productId);
-        return productImageRepository.findAllByProductId(productId);
+        return productImageRepository.findAllByProductsId(productId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public ProductImageResponse getProductImageById(UUID id) {
+        return toResponse(findById(id));
     }
 
     public ProductImage findById(UUID id) {
@@ -113,6 +118,25 @@ public class ProductImageService {
         }
         return productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+    }
+
+    public ProductImageResponse toResponse(ProductImage productImage) {
+        return new ProductImageResponse(
+                productImage.getId(),
+                productImage.getBucketName(),
+                productImage.getObjectPath(),
+                productImage.getWidth(),
+                productImage.getHeight(),
+                supabaseStorageService.createSignedUrl(
+                        productImage.getBucketName(),
+                        productImage.getObjectPath()
+                ),
+                productImage.getAltText(),
+                productImage.getMainImage(),
+                productImage.getProducts().stream()
+                        .map(Product::getId)
+                        .toList()
+        );
     }
 
     private ImageSize getImageSize(MultipartFile file) {

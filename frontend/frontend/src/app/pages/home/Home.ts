@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HeroCarouselComponent } from '../../shared/hero/component';
+import { HeroCarousselComponent } from '../../components/hero_caroussel/Hero';
 import { NewArrivalsSection } from '../../components/newArrivalsSection/newArrivalsSection';
 import { FaqComponent } from '../../shared/faq/Faq';
 import { AboutComponent } from '../../components/about/About';
@@ -11,7 +11,7 @@ import { NewsletterComponent } from '../../components/newsletter/Newsletter';
 @Component({
   selector: 'app-home-page',
   imports: [
-    HeroCarouselComponent,
+    HeroCarousselComponent,
     NewArrivalsSection,
     FaqComponent,
     AboutComponent,

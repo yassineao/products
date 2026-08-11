@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class SupabaseStorageProperties {
     private String url;
     private String serviceKey;
-    private String bucket = "product-images";
+    private String bucket = "products";
+    private long signedUrlExpirationSeconds = 3600;
 
 }

@@ -1,4 +1,7 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
   application:
     name: Products
   config:
@@ -30,8 +33,12 @@ spring:
     create-schemas: false
     locations: classpath:db/migration
 
+user-backend:
+  url: ${USER_BACKEND_URL:http://localhost:8081}
+
 supabase:
   storage:
     url: ${SUPABASE_URL:http://localhost}
     service-key: ${SUPABASE_SERVICE_ROLE_KEY:${SUPABASE_SECRET_KEY:}}
-    bucket: ${SUPABASE_STORAGE_BUCKET:product-images}
+    bucket: ${SUPABASE_STORAGE_BUCKET:products}
+    signed-url-expiration-seconds: ${SUPABASE_SIGNED_URL_EXPIRATION_SECONDS:3600}

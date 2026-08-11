@@ -18,12 +18,6 @@ public class ProductImageController {
         this.productImageService = productImageService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> addProductImage(@Valid @RequestBody ProductImageRequest productImageRequest) {
-        productImageService.AddProductImage(productImageRequest);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping("/upload")
     public ResponseEntity<?> uploadProductImage(
             @RequestParam UUID productId,
@@ -41,7 +35,7 @@ public class ProductImageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductImageById(@PathVariable UUID id) {
-        return ResponseEntity.ok().body(productImageService.findById(id));
+        return ResponseEntity.ok().body(productImageService.getProductImageById(id));
     }
 
     @GetMapping("/product/{productId}")

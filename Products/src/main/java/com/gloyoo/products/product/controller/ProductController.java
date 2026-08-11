@@ -35,7 +35,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable UUID id) {
-        return ResponseEntity.ok().body(productService.findById(id));
+        return ResponseEntity.ok().body(productService.getProductById(id));
     }
 
     @PatchMapping("/{id}")

@@ -5,8 +5,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -34,13 +38,17 @@ public class ProductImage {
     @Column(nullable = false)
     private Integer height;
 
-    @Column(nullable = false)
-    private String publicUrl;
-
     private String altText;
     private Boolean mainImage;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @ManyToMany
+    @JoinTable(
+            name = "product_image_product",
+            joinColumns = @JoinColumn(name = "product_image_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Product> products = new ArrayList<>();
 }

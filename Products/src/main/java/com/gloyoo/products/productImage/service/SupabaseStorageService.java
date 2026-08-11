@@ -2,15 +2,12 @@ package com.gloyoo.products.productImage.service;
 
 import com.gloyoo.products.productImage.client.SupabaseStorageClient;
 import com.gloyoo.products.productImage.config.SupabaseStorageProperties;
-import feign.Feign;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -20,8 +17,6 @@ public class SupabaseStorageService {
     private final SupabaseStorageProperties supabaseStorageProperties;
 
     private final SupabaseStorageClient supabaseStorageClient;
-
-
 
     public StoredImage uploadProductImage(UUID productId, MultipartFile file) {
         if (productId == null) {
@@ -54,23 +49,58 @@ public class SupabaseStorageService {
             throw new IllegalArgumentException("Could not read image file", exception);
         }
 
-        return new StoredImage(bucketName, objectPath, getPublicUrl(bucketName, objectPath));
+        return new StoredImage(bucketName, objectPath);
+    }
+
+    public String createSignedUrl(String bucketName, String objectPath) {
+        validateStorageAccess(bucketName, objectPath);
+
+        SupabaseStorageClient.SignedUrlResponse response = supabaseStorageClient.createSignedUrl(
+                bucketName,
+                objectPath,
+                "Bearer " + supabaseStorageProperties.getServiceKey(),
+                supabaseStorageProperties.getServiceKey(),
+                new SupabaseStorageClient.SignedUrlRequest(
+                        supabaseStorageProperties.getSignedUrlExpirationSeconds()
+                )
+        );
+
+        if (response == null || !StringUtils.hasText(response.signedUrl())) {
+            throw new IllegalStateException("Supabase did not return a signed image URL");
+        }
+
+        String signedUrl = response.signedUrl();
+        if (signedUrl.startsWith("http://") || signedUrl.startsWith("https://")) {
+            return signedUrl;
+        }
+        return getStorageUrl() + (signedUrl.startsWith("/") ? signedUrl : "/" + signedUrl);
+    }
+
+    public void deleteProductImage(String bucketName, String objectPath) {
+        validateStorageAccess(bucketName, objectPath);
+
+        supabaseStorageClient.delete(
+                bucketName,
+                objectPath,
+                "Bearer " + supabaseStorageProperties.getServiceKey(),
+                supabaseStorageProperties.getServiceKey()
+        );
     }
 
     private String getStorageUrl() {
         return supabaseStorageProperties.getUrl().replaceAll("/+$", "") + "/storage/v1";
     }
 
-    private String getPublicUrl(String bucketName, String objectPath) {
-        return getStorageUrl() + "/object/public/" + bucketName + "/" + encodeObjectPath(objectPath);
-    }
-
-    private String encodeObjectPath(String objectPath) {
-        String[] parts = objectPath.split("/");
-        for (int index = 0; index < parts.length; index++) {
-            parts[index] = URLEncoder.encode(parts[index], StandardCharsets.UTF_8).replace("+", "%20");
+    private void validateStorageAccess(String bucketName, String objectPath) {
+        if (!StringUtils.hasText(bucketName) || !StringUtils.hasText(objectPath)) {
+            throw new IllegalArgumentException("Image bucket name and object path cannot be empty");
         }
-        return String.join("/", parts);
+        if (!StringUtils.hasText(supabaseStorageProperties.getUrl())) {
+            throw new IllegalStateException("Supabase storage url is not configured");
+        }
+        if (!StringUtils.hasText(supabaseStorageProperties.getServiceKey())) {
+            throw new IllegalStateException("Supabase storage service key is not configured");
+        }
     }
 
     private String getContentType(MultipartFile file) {
@@ -91,8 +121,7 @@ public class SupabaseStorageService {
 
     public record StoredImage(
             String bucketName,
-            String objectPath,
-            String publicUrl
+            String objectPath
     ) {
     }
 }
