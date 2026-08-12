@@ -29,20 +29,13 @@ public class ProductService {
         this.productImageService = productImageService;
     }
 
-    public void AddProduct(ProductRequest productRequest) {
-        Category category = getCategory(productRequest.categoryId());
+    @Transactional
+    public void AddProducts(List<ProductRequest> productRequests) {
+        List<Product> products = productRequests.stream()
+                .map(this::toEntity)
+                .toList();
 
-        Product product = Product.builder()
-                .name(productRequest.name())
-                .description(productRequest.description())
-                .price(productRequest.price())
-                .category(category)
-                .tags(productRequest.tags())
-                .active(productRequest.active())
-                .quantity(productRequest.quantity())
-                .build();
-
-        productRepository.save(product);
+        productRepository.saveAll(products);
     }
 
     public void DeleteProduct(UUID id) {
@@ -99,6 +92,18 @@ public class ProductService {
         }
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+    }
+
+    private Product toEntity(ProductRequest productRequest) {
+        return Product.builder()
+                .name(productRequest.name())
+                .description(productRequest.description())
+                .price(productRequest.price())
+                .category(getCategory(productRequest.categoryId()))
+                .tags(productRequest.tags())
+                .active(productRequest.active())
+                .quantity(productRequest.quantity())
+                .build();
     }
 
     private ProductResponse toResponse(Product product) {

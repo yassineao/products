@@ -1,6 +1,31 @@
 spring:
   application:
     name: cart
+  datasource:
+    url: ${DATABASE_URL:${SUPABASE_DB_URL:jdbc:h2:mem:cart;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1}}
+    username: ${DATABASE_USERNAME:${SUPABASE_DB_USERNAME:sa}}
+    password: ${DATABASE_PASSWORD:${SUPABASE_DB_PASSWORD:}}
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 0
+      connection-timeout: 10000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: public
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: public
+    schemas:
+      - public
+    table: flyway_schema_history_cart
+    baseline-on-migrate: true
+    baseline-version: 0
+    create-schemas: true
 
 product-service:
   url: ${PRODUCT_SERVICE_URL:http://localhost:8082}

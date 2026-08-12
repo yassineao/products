@@ -3,9 +3,11 @@ package com.gloyoo.products.product.controller;
 import com.gloyoo.products.product.dto.ProductRequest;
 import com.gloyoo.products.product.service.ProductService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -18,8 +20,10 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addProduct(@Valid @RequestBody ProductRequest productRequest) {
-        productService.AddProduct(productRequest);
+    public ResponseEntity<?> addProducts(
+            @RequestBody @NotEmpty List<@Valid ProductRequest> productRequests
+    ) {
+        productService.AddProducts(productRequests);
         return ResponseEntity.ok().build();
     }
 
