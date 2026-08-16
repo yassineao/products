@@ -87,12 +87,14 @@ public class ProductImageService {
         });
     }
 
+    @Transactional(readOnly = true)
     public List<ProductImageResponse> getAllProductImages() {
         return productImageRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ProductImageResponse> getProductImagesByProduct(UUID productId) {
         getProduct(productId);
         return productImageRepository.findAllByProductsId(productId).stream()
@@ -100,6 +102,7 @@ public class ProductImageService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ProductImageResponse getProductImageById(UUID id) {
         return toResponse(findById(id));
     }

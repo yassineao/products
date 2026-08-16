@@ -1,7 +1,15 @@
 package com.gloyoo.products;
 
+import com.gloyoo.products.category.entity.Category;
+import com.gloyoo.products.category.repository.CategoryRepository;
+import com.gloyoo.products.product.entity.Product;
+import com.gloyoo.products.product.repository.ProductRepository;
+import com.gloyoo.products.productImage.client.SupabaseStorageClient;
+import com.gloyoo.products.productImage.entity.ProductImage;
+import com.gloyoo.products.productImage.repository.ProductImageRepository;
 import com.gloyoo.products.users.client.UserClient;
 import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +20,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -32,6 +44,18 @@ class ProductsApplicationTests {
     @MockitoBean
     private UserClient userClient;
 
+    @MockitoBean
+    private SupabaseStorageClient supabaseStorageClient;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ProductImageRepository productImageRepository;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -39,6 +63,13 @@ class ProductsApplicationTests {
         mockMvc = webAppContextSetup(applicationContext)
                 .apply(springSecurity())
                 .build();
+    }
+
+    @AfterEach
+    void clearDatabase() {
+        productImageRepository.deleteAll();
+        productRepository.deleteAll();
+        categoryRepository.deleteAll();
     }
 
     @Test
@@ -60,6 +91,57 @@ class ProductsApplicationTests {
                 .andExpect(status().isOk());
 
         verifyNoInteractions(userClient);
+    }
+
+    @Test
+    void productImagesArePublic() throws Exception {
+        mockMvc.perform(get("/product-image"))
+                .andExpect(status().isOk());
+
+        verifyNoInteractions(userClient);
+    }
+
+    @Test
+    void staleAccessTokenDoesNotBlockPublicProductImages() throws Exception {
+        mockMvc.perform(get("/product-image")
+                        .cookie(new Cookie("accessToken", "expired-or-invalid")))
+                .andExpect(status().isOk());
+
+        verifyNoInteractions(userClient);
+    }
+
+    @Test
+    void productImagesIncludeProductIdsAfterRepositorySessionCloses() throws Exception {
+        Category category = categoryRepository.save(Category.builder()
+                .name("Image test category")
+                .active(true)
+                .build());
+        Product product = productRepository.save(Product.builder()
+                .name("Image test product")
+                .price(BigDecimal.TEN)
+                .quantity(1)
+                .active(true)
+                .category(category)
+                .build());
+        ProductImage image = productImageRepository.save(ProductImage.builder()
+                .bucketName("products")
+                .objectPath("products/test/image.jpg")
+                .width(100)
+                .height(100)
+                .mainImage(true)
+                .products(List.of(product))
+                .build());
+
+        when(supabaseStorageClient.createSignedUrl(
+                anyString(), anyString(), anyString(), anyString(), any()
+        )).thenReturn(new SupabaseStorageClient.SignedUrlResponse("/signed/image.jpg"));
+
+        mockMvc.perform(get("/product-image"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .jsonPath("$[0].id").value(image.getId().toString()))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .jsonPath("$[0].productIds[0]").value(product.getId().toString()));
     }
 
     @Test

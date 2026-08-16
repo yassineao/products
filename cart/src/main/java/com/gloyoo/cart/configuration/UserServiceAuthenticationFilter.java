@@ -63,7 +63,6 @@ public class UserServiceAuthenticationFilter extends OncePerRequestFilter {
                     );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
-            log.info( principal.name().toUpperCase(Locale.ROOT) );
         } catch (FeignException exception) {
             SecurityContextHolder.clearContext();
             if (exception.status() == HttpServletResponse.SC_UNAUTHORIZED

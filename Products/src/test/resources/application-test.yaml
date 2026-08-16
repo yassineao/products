@@ -12,3 +12,8 @@ spring:
     properties:
       hibernate:
         default_schema: public
+
+supabase:
+  storage:
+    url: http://localhost
+    service-key: test-service-key

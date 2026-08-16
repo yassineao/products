@@ -41,7 +41,6 @@ public class SupabaseStorageService {
                     objectPath,
                     "Bearer " + supabaseStorageProperties.getServiceKey(),
                     supabaseStorageProperties.getServiceKey(),
-                    getContentType(file),
                     "true",
                     file.getBytes()
             );
@@ -101,13 +100,6 @@ public class SupabaseStorageService {
         if (!StringUtils.hasText(supabaseStorageProperties.getServiceKey())) {
             throw new IllegalStateException("Supabase storage service key is not configured");
         }
-    }
-
-    private String getContentType(MultipartFile file) {
-        if (StringUtils.hasText(file.getContentType())) {
-            return file.getContentType();
-        }
-        return "application/octet-stream";
     }
 
     private String getFileExtension(MultipartFile file) {
