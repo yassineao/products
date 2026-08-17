@@ -1,0 +1,60 @@
+import { Component, computed, inject, Input, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ProductsService } from '../../core/api/products_api/product.service';
+import { CategoryService } from '../../core/api/category_api/category.service';
+import { Category } from '../../core/interfaces/Category';
+import { map } from 'rxjs';
+import { PopupShopPage } from '../popup/Popup';
+
+const ALL_CATEGORY: Category = {
+  id: '0',
+  name: 'All',
+  description: 'All',
+  active: true,
+};
+
+@Component({
+  selector: 'Catalogue',
+  templateUrl: './Catalogue.html',
+  imports: [PopupShopPage],
+})
+export class CataloguePage {
+  @Input()
+  CompoOrPage: boolean = false;
+
+  private readonly categoriesService = inject(CategoryService);
+  protected readonly categories = toSignal(
+    this.categoriesService.getCategories().pipe(map((categories) => [ALL_CATEGORY, ...categories])),
+    { initialValue: [ALL_CATEGORY] },
+  );
+  protected readonly selectedCategory = signal('All');
+  private readonly productsService = inject(ProductsService);
+  protected products = toSignal(this.productsService.getProducts(), {
+    initialValue: [],
+  });
+
+  protected readonly visibleProducts = computed(() => {
+    const category = this.selectedCategory();
+    const products = this.products();
+    const newProducts =
+      category === 'All'
+        ? products
+        : products.filter((product) => product.category.name === category);
+
+    return !this.CompoOrPage?
+      newProducts
+      : newProducts.slice(0,4)
+      ;
+  });
+  protected showPopup = signal(false);
+
+  openPopup() {
+    console.log(this.showPopup);
+    this.showPopup.set(true);
+  }
+
+  closePopup() {
+    console.log(this.showPopup);
+    this.showPopup.set(false);
+  }
+}

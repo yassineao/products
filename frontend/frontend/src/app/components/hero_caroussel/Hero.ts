@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Component, OnDestroy, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 type HeroSlide = {
@@ -56,6 +56,7 @@ export class HeroCarousselComponent implements OnInit, OnDestroy {
   protected readonly currentSlide = computed(() => this.slides[this.currentIndex()]);
 
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ngZone = inject(NgZone);
   private autoplayTimer?: ReturnType<typeof setInterval>;
   private pointerStartX?: number;
 
@@ -114,7 +115,11 @@ export class HeroCarousselComponent implements OnInit, OnDestroy {
 
   private startAutoplay(): void {
     if (!isPlatformBrowser(this.platformId) || this.autoplayTimer) return;
-    this.autoplayTimer = setInterval(() => this.next(), 6000);
+    this.ngZone.runOutsideAngular(() => {
+      this.autoplayTimer = setInterval(() => {
+        this.ngZone.run(() => this.next());
+      }, 6000);
+    });
   }
 
   private stopAutoplay(): void {

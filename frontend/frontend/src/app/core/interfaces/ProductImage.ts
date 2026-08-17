@@ -1,11 +1,11 @@
-import { Product } from './Product';
-
 export interface ProductImage {
   id: string;
+  bucketName: string;
+  objectPath: string;
   altText: string;
   width: number;
   height: number;
-  productId: String;
-  mainPage: boolean;
-  file: File;
+  signedUrl: string;
+  mainImage: boolean;
+  productIds: string[];
 }
