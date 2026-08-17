@@ -62,6 +62,13 @@
                   [height]="image.height"
                 />
               }
+              @else{
+                <img
+                  class="h-80 w-full object-cover transition duration-500 group-hover:scale-105"
+                  src="/no-image-placeholder.svg"
+                  alt="Product image unavailable"
+                />
+              }
               @if (showPopup()) {
                 <div
                   class="fixed inset-0 z-50  flex items-center justify-center bg-black/60 p-4 mt-20 backdrop-blur-sm sm:p-6"

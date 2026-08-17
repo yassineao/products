@@ -1,5 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
-import { ApplicationRef, Component, inject, PLATFORM_ID } from '@angular/core';
+import { Component, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HeroCarousselComponent } from '../../components/hero_caroussel/Hero';
 import { NewArrivalsSection } from '../../components/newArrivalsSection/newArrivalsSection';
 import { FaqComponent } from '../../shared/faq/Faq';
@@ -8,16 +9,15 @@ import { CollectionGridComponent } from '../../components/collectionGrid/Collect
 import { CraftsmanshipComponent } from '../../components/craftsmanship/Craftsmanship';
 import { TestimonialsComponent } from '../../components/testimonials/Testimonials';
 import { NewsletterComponent } from '../../components/newsletter/Newsletter';
-import { UserService } from '../../core/api/user_api/user.service';
 import { ProductsService } from '../../core/api/products_api/product.service';
-import { filter, switchMap, take } from 'rxjs';
 import { CataloguePage } from '../../components/catalogue/Catalogue';
+import { Product } from '../../core/interfaces/Product';
 
 @Component({
   selector: 'app-home-page',
   imports: [
     HeroCarousselComponent,
-    NewArrivalsSection,
+    // NewArrivalsSection,
     FaqComponent,
     AboutComponent,
     CollectionGridComponent,
@@ -29,24 +29,30 @@ import { CataloguePage } from '../../components/catalogue/Catalogue';
   templateUrl: './Home.html',
 })
 export class HomePage {
-  private readonly applicationRef = inject(ApplicationRef);
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly userService = inject(UserService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly productService = inject(ProductsService);
+  protected readonly products = signal<Product[] | null>(null);
+  protected readonly loadFailed = signal(false);
 
   ngOnInit(): void {
-    this.userService.health();
-
     if (isPlatformBrowser(this.platformId)) {
-      this.applicationRef.isStable
-        .pipe(
-          filter(Boolean),
-          take(1),
-          switchMap(() => this.productService.getProducts()),
-        )
-        .subscribe((products) => {
-          localStorage.setItem('products', JSON.stringify(products));
-        });
+      this.loadProducts();
     }
+  }
+
+  protected loadProducts(): void {
+    this.products.set(null);
+    this.loadFailed.set(false);
+
+    this.productService.getProducts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (products) => {
+        this.products.set(products);
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('products', JSON.stringify(products));
+        }
+      },
+      error: () => this.loadFailed.set(true),
+    });
   }
 }
