@@ -27,10 +27,7 @@
 
         <div class="mb-2 flex gap-3">
           <div class="flex-1">
-            <button
-              class="w-full rounded-full bg-moroccan-green px-4 py-3 text-sm font-bold text-ivory shadow-md transition hover:-translate-y-0.5 hover:bg-moroccan-green/90 hover:shadow-lg">
-              Add to Cart
-            </button>
+            <cart-button [product]="product" [color]="currentColor()" [size]="currentSize()" />
           </div>
           <div class="flex-1">
             <button
@@ -64,39 +61,38 @@
         <div class="mb-6">
           <span class="text-sm font-bold text-dark-brown">Select Color:</span>
           <div class="mt-3 flex items-center gap-3">
-            <button
-              class="h-8 w-8 rounded-full bg-gray-800 ring-2 ring-transparent ring-offset-2 ring-offset-ivory transition hover:scale-110 hover:ring-terracotta"></button>
-            <button
-              class="h-8 w-8 rounded-full bg-red-700 ring-2 ring-transparent ring-offset-2 ring-offset-ivory transition hover:scale-110 hover:ring-terracotta"></button>
-            <button
-              class="h-8 w-8 rounded-full bg-blue-700 ring-2 ring-transparent ring-offset-2 ring-offset-ivory transition hover:scale-110 hover:ring-terracotta"></button>
-            <button
-              class="h-8 w-8 rounded-full bg-yellow-500 ring-2 ring-transparent ring-offset-2 ring-offset-ivory transition hover:scale-110 hover:ring-terracotta"></button>
+            @for (color of product.color ?? []; track color) {
+              <button
+                type="button"
+                (click)="select_color(color)"
+                [style.backgroundColor]="color"
+                [attr.aria-label]="'Select ' + color + ' color'"
+                [attr.aria-pressed]="currentColor() === color"
+                [title]="color"
+                class="h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-ivory transition hover:scale-110"
+                [class.ring-terracotta]="currentColor() === color"
+                [class.ring-transparent]="currentColor() !== color">
+              </button>
+            } @empty {
+              <span class="text-sm text-dark-brown/55">No color options available</span>
+            }
           </div>
         </div>
         <div class="mb-6">
           <span class="text-sm font-bold text-dark-brown">Select Size:</span>
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory">
-              S
-            </button>
-            <button
-              class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory">
-              M
-            </button>
-            <button
-              class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory">
-              L
-            </button>
-            <button
-              class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory">
-              XL
-            </button>
-            <button
-              class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory">
-              XXL
-            </button>
+            @for (size of product.size ?? []; track size) {
+              <button
+                type="button"
+                class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory"
+                [class.ring-2]="currentSize() === size"
+                [class.ring-terracotta]="currentSize() === size"
+                [attr.aria-pressed]="currentSize() === size"
+                (click)="select_size(size)"
+              >{{ size }}</button>
+            } @empty {
+              <span class="text-sm text-dark-brown/55">No size options available</span>
+            }
           </div>
         </div>
         <div>

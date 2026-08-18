@@ -3,10 +3,11 @@ import { Component, DestroyRef, HostListener, inject, OnInit, PLATFORM_ID, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ProductsService } from '../../core/api/products_api/product.service';
+import { CartDropComponent } from '../../components/cartDrop/CartDrop';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, CartDropComponent],
   templateUrl: './Navbar.html',
 })
 export class Navbar implements OnInit {

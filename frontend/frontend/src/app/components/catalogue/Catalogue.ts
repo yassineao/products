@@ -50,7 +50,10 @@ export class CataloguePage implements OnInit {
       return;
     }
 
-    this.productsService.getProducts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.productsService.getProducts().pipe(
+      takeUntilDestroyed(this.destroyRef)
+
+    ).subscribe({
       next: (products) => this.products.set(products),
       error: () => this.products.set([]),
     });
@@ -58,7 +61,13 @@ export class CataloguePage implements OnInit {
 
   protected readonly visibleProducts = computed(() => {
     const category = this.selectedCategory();
-    const products = this.products();
+    const products = this.products()
+      .filter(
+        (product, index, products) =>
+          products.findIndex(p => p.name === product.name) === index
+
+      )
+    ;
     const newProducts =
       category === 'All'
         ? products
@@ -69,15 +78,13 @@ export class CataloguePage implements OnInit {
       : newProducts.slice(0,4)
       ;
   });
-  protected showPopup = signal(false);
+  protected readonly selectedProduct = signal<Product | null>(null);
 
-  openPopup() {
-    console.log(this.showPopup);
-    this.showPopup.set(true);
+  protected openPopup(product: Product): void {
+    this.selectedProduct.set(product);
   }
 
-  closePopup() {
-    console.log(this.showPopup);
-    this.showPopup.set(false);
+  protected closePopup(): void {
+    this.selectedProduct.set(null);
   }
 }

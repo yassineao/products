@@ -11,4 +11,6 @@ export interface Product {
   active: boolean;
   category: Category;
   productImage: ProductImage[];
+  color?: string;
+  size?: string;
 }
