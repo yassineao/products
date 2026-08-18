@@ -1,9 +1,10 @@
-import { Component, computed, DestroyRef, inject, Input, OnInit, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, computed, DestroyRef, inject, Input, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ProductsService } from '../../core/api/products_api/product.service';
 import { CategoryService } from '../../core/api/category_api/category.service';
 import { Category } from '../../core/interfaces/Category';
-import { map } from 'rxjs';
+import { map, of } from 'rxjs';
 import { PopupShopPage } from '../popup/Popup';
 import { Product } from '../../core/interfaces/Product';
 
@@ -26,9 +27,12 @@ export class CataloguePage implements OnInit {
   @Input()
   productItems: Product[] | null = null;
 
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly categoriesService = inject(CategoryService);
   protected readonly categories = toSignal(
-    this.categoriesService.getCategories().pipe(map((categories) => [ALL_CATEGORY, ...categories])),
+    (isPlatformBrowser(this.platformId)
+      ? this.categoriesService.getCategories().pipe(map((categories) => [ALL_CATEGORY, ...categories]))
+      : of([ALL_CATEGORY])),
     { initialValue: [ALL_CATEGORY] },
   );
   protected readonly selectedCategory = signal('All');
@@ -39,6 +43,10 @@ export class CataloguePage implements OnInit {
   ngOnInit(): void {
     if (this.productItems !== null) {
       this.products.set(this.productItems);
+      return;
+    }
+
+    if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 

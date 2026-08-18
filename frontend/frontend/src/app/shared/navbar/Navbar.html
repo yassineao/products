@@ -19,10 +19,15 @@
     <div class="flex items-center gap-2.5">
       <a
         class="rounded-full border border-warm-gold bg-warm-gold px-4 py-2.5 text-sm font-bold text-dark-brown no-underline transition hover:-translate-y-px hover:bg-ivory focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold active:scale-95 motion-reduce:transition-none"
-        routerLink="/shop"
+        [class.cursor-not-allowed]="!productsLoaded()"
+        [class.opacity-50]="!productsLoaded()"
+        [class.pointer-events-none]="!productsLoaded()"
+        [routerLink]="productsLoaded() ? '/shop' : null"
+        [attr.aria-disabled]="!productsLoaded()"
+        [attr.tabindex]="productsLoaded() ? null : -1"
         (click)="closeMenu()"
       >
-        Shop now
+        {{ productsLoaded() ? 'Shop now' : 'Loading shop…' }}
       </a>
       <button
         class="grid size-[42px] cursor-pointer place-items-center rounded-full border border-warm-gold/40 bg-ivory/10 p-0 text-ivory hover:bg-ivory/20 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold md:hidden"
@@ -77,11 +82,16 @@
         <li>
           <a
             class="block rounded-[10px] px-3.5 py-3 text-sm font-semibold text-ivory/70 no-underline transition-colors hover:bg-warm-gold/20 hover:text-ivory focus-visible:bg-warm-gold/20 focus-visible:text-ivory focus-visible:outline-2 focus-visible:outline-warm-gold motion-reduce:transition-none md:rounded-full md:px-[13px] md:py-[9px]"
-            routerLink="/shop"
+            [class.cursor-not-allowed]="!productsLoaded()"
+            [class.opacity-50]="!productsLoaded()"
+            [class.pointer-events-none]="!productsLoaded()"
+            [routerLink]="productsLoaded() ? '/shop' : null"
             routerLinkActive="bg-warm-gold/20 text-ivory"
             ariaCurrentWhenActive="page"
+            [attr.aria-disabled]="!productsLoaded()"
+            [attr.tabindex]="productsLoaded() ? null : -1"
             (click)="closeMenu()"
-          >Shop</a>
+          >{{ productsLoaded() ? 'Shop' : 'Shop (loading…)' }}</a>
         </li>
         <li>
           <a

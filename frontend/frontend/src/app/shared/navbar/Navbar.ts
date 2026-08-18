@@ -1,13 +1,31 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, DestroyRef, HostListener, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ProductsService } from '../../core/api/products_api/product.service';
 
 @Component({
   selector: 'app-navbar',
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './Navbar.html',
 })
-export class Navbar {
+export class Navbar implements OnInit {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly productsService = inject(ProductsService);
+  protected readonly productsLoaded = this.productsService.productsLoaded;
   protected readonly menuOpen = signal(false);
+
+  ngOnInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.productsService
+      .getProducts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
+  }
 
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);

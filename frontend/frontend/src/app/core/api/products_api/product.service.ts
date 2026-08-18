@@ -1,7 +1,7 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Product } from '../../interfaces/Product';
-import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../../../../environment';
 import { ProductImageService } from '../supabase_api/product_image.service';
 
@@ -12,25 +12,41 @@ export class ProductsService {
   private httpClient = inject(HttpClient);
   private apiUrl: string = environment.apiUrl;
   private productImageService = inject(ProductImageService);
+  private productsRequest?: Observable<Product[]>;
+  readonly productsLoaded = signal(false);
 
   getProducts(): Observable<Product[]> {
-    return this.httpClient.get<Product[]>(`${this.apiUrl}/product`).pipe(
-      switchMap((products) =>
-        products.length === 0
-          ? of([])
-          : forkJoin(
-              products.map((product) =>
-                  this.productImageService.getProductImages(product.id).pipe(
-                    map((images) => ({
-                      ...product,
-                      productImage: images,
-                    })),
-                  )
-                ),
-              ),
-            ),
+    if (this.productsRequest) {
+      return this.productsRequest;
+    }
 
+    this.productsRequest = this.httpClient.get<Product[]>(`${this.apiUrl}/product`).pipe(
+      switchMap((products) => {
+        if (products.length === 0) {
+          return of<Product[]>([]);
+        }
+
+        return forkJoin(
+          products.map((product) =>
+            this.productImageService.getProductImages(product.id).pipe(
+              map((images) => ({
+                ...product,
+                productImage: images,
+              })),
+            ),
+          ),
+        );
+      }),
+      tap(() => this.productsLoaded.set(true)),
+      catchError((error) => {
+        this.productsRequest = undefined;
+        this.productsLoaded.set(false);
+        return throwError(() => error);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
+
+    return this.productsRequest;
   }
 
 
