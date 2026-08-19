@@ -83,7 +83,7 @@
       }
     </div>
 
-    @if (selectedProduct(); as product) {
+    @if (selectedProducts(); as products) {
       <div
         class="fixed inset-0 z-50 mt-20 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-6"
         (click)="closePopup()"
@@ -92,10 +92,10 @@
           class="max-h-[90vh] w-full max-w-5xl overflow-hidden p-4 sm:overflow-y-clip sm:p-6 lg:p-8"
           role="dialog"
           aria-modal="true"
-          [attr.aria-label]="product.name"
+          [attr.aria-label]="products[0].name"
           (click)="$event.stopPropagation()"
         >
-          <popup-shop-page [product]="product" />
+          <popup-shop-page [products]="products" />
         </div>
       </div>
     }

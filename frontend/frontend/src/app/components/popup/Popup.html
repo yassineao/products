@@ -1,3 +1,4 @@
+@if (selectedProduct(); as product) {
 <div class="bg-ivory  text-dark-brown sm:py-4 ">
   <div class="mx-auto max-w-6xl px-1 sm:px-3 lg:px-5">
     <div class="flex flex-col gap-8 md:flex-row md:items-start lg:gap-12">
@@ -61,7 +62,7 @@
         <div class="mb-6">
           <span class="text-sm font-bold text-dark-brown">Select Color:</span>
           <div class="mt-3 flex items-center gap-3">
-            @for (color of product.color ?? []; track color) {
+            @for (color of colors(); track color) {
               <button
                 type="button"
                 (click)="select_color(color)"
@@ -81,7 +82,7 @@
         <div class="mb-6">
           <span class="text-sm font-bold text-dark-brown">Select Size:</span>
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            @for (size of product.size ?? []; track size) {
+            @for (size of sizes(); track size) {
               <button
                 type="button"
                 class="min-w-11 rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-sm font-bold text-dark-brown transition hover:border-terracotta hover:bg-terracotta hover:text-ivory"
@@ -105,3 +106,4 @@
     </div>
   </div>
 </div>
+}

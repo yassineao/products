@@ -14,6 +14,7 @@ import {
 } from 'rxjs';
 import { environment } from '../../../../../environment';
 import { ProductImageService } from '../supabase_api/product_image.service';
+import { ProductColorSize } from '../../interfaces/ProductColorSize';
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +49,7 @@ export class ProductsService {
           ),
         );
       }),
+
       tap(() => this.productsLoaded.set(true)),
       catchError((error) => {
         this.productsRequest = undefined;
@@ -59,6 +61,7 @@ export class ProductsService {
 
     return this.productsRequest;
   }
+
 
   getActiveProducts(): Observable<Product[]> {
     return this.httpClient.get<Product[]>(`${this.apiUrl}/products/active`).pipe(
@@ -79,6 +82,8 @@ export class ProductsService {
       ),
     );
   }
+
+
 
   private parseProductOptions(product: Product): Product {
     if (!product.name.includes('[')) {

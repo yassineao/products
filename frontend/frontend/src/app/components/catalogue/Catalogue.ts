@@ -78,13 +78,17 @@ export class CataloguePage implements OnInit {
       : newProducts.slice(0,4)
       ;
   });
-  protected readonly selectedProduct = signal<Product | null>(null);
+
+
+  protected readonly selectedProducts = signal<Product[] | null>(null);
 
   protected openPopup(product: Product): void {
-    this.selectedProduct.set(product);
+    this.selectedProducts.set(
+      this.products().filter((candidate) => candidate.name === product.name),
+    );
   }
 
   protected closePopup(): void {
-    this.selectedProduct.set(null);
+    this.selectedProducts.set(null);
   }
 }
