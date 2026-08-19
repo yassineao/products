@@ -14,7 +14,16 @@ import {
 } from 'rxjs';
 import { environment } from '../../../../../environment';
 import { ProductImageService } from '../supabase_api/product_image.service';
-import { ProductColorSize } from '../../interfaces/ProductColorSize';
+
+interface ProductRequest {
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  tags: string[];
+  active: boolean;
+  categoryId: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -62,9 +71,8 @@ export class ProductsService {
     return this.productsRequest;
   }
 
-
   getActiveProducts(): Observable<Product[]> {
-    return this.httpClient.get<Product[]>(`${this.apiUrl}/products/active`).pipe(
+    return this.httpClient.get<Product[]>(`${this.apiUrl}/product/active`).pipe(
       map((products) => products.map((product) => this.parseProductOptions(product))),
       switchMap((products) =>
         products.length === 0
@@ -82,8 +90,6 @@ export class ProductsService {
       ),
     );
   }
-
-
 
   private parseProductOptions(product: Product): Product {
     if (!product.name.includes('[')) {
@@ -105,28 +111,44 @@ export class ProductsService {
     };
   }
 
-  private parseOptionList(value: string): string[] {
-    return value
-      .split(/[,|]/)
-      .map((option) => option.trim())
-      .filter(Boolean);
+  private toProductRequest(product: Product): ProductRequest {
+    return {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      quantity: product.quantity,
+      tags: product.tags,
+      active: product.active,
+      categoryId: product.category.id,
+    };
   }
 
-  addProduct(Product: Product): void {
-    this.httpClient.post(`${this.apiUrl}/product`, Product, {
-      withCredentials: true,
-    });
+  private invalidateProductsCache(): void {
+    this.productsRequest = undefined;
+    this.productsLoaded.set(false);
   }
 
-  updateProduct(Product: Product): void {
-    this.httpClient.put(`${this.apiUrl}/product`, Product, {
-      withCredentials: true,
-    });
+  addProduct(product: Product): Observable<void> {
+    return this.httpClient
+      .post<void>(`${this.apiUrl}/product`, [this.toProductRequest(product)], {
+        withCredentials: true,
+      })
+      .pipe(tap(() => this.invalidateProductsCache()));
   }
 
-  deleteProduct(ProductId: String): void {
-    this.httpClient.delete(`${this.apiUrl}/product/${ProductId}`, {
-      withCredentials: true,
-    });
+  updateProduct(product: Product): Observable<void> {
+    return this.httpClient
+      .patch<void>(`${this.apiUrl}/product/${product.id}`, this.toProductRequest(product), {
+        withCredentials: true,
+      })
+      .pipe(tap(() => this.invalidateProductsCache()));
+  }
+
+  deleteProduct(productId: string): Observable<void> {
+    return this.httpClient
+      .delete<void>(`${this.apiUrl}/product/${productId}`, {
+        withCredentials: true,
+      })
+      .pipe(tap(() => this.invalidateProductsCache()));
   }
 }
