@@ -41,21 +41,35 @@ export class ProductsService {
     }
 
     this.productsRequest = this.httpClient.get<Product[]>(`${this.apiUrl}/product`).pipe(
-      map((products) => products.map((product) => this.parseProductOptions(product))),
       switchMap((products) => {
         if (products.length === 0) {
           return of<Product[]>([]);
         }
 
         return forkJoin(
-          products.map((product) =>
-            this.productImageService.getProductImages(product.id).pipe(
+          products.map((product) => {
+            const shouldLoadImages = product.name.trim().endsWith('@');
+            const parsedProduct = this.parseProductOptions(product);
+            if (!shouldLoadImages) {
+              return of({
+                ...parsedProduct,
+                productImage: [],
+              });
+            }
+
+            return this.productImageService.getProductImages(product.id).pipe(
               map((images) => ({
-                ...product,
+                ...parsedProduct,
                 productImage: images,
               })),
-            ),
-          ),
+              catchError(() =>
+                of({
+                  ...parsedProduct,
+                  productImage: [],
+                }),
+              ),
+            );
+          }),
         );
       }),
 
@@ -101,7 +115,9 @@ export class ProductsService {
     const size = product.name
       .slice(product.name.indexOf('[') + 1, product.name.indexOf(']'))
       .trim();
-    const color = product.name.slice(product.name.indexOf(']') + 1).trim();
+    const color = product.name
+      .slice(product.name.indexOf(']') + 1, product.name.endsWith('@') ? product.name.indexOf('@') : undefined )
+      .trim();
 
     return {
       ...product,

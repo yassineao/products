@@ -61,13 +61,18 @@ export class CataloguePage implements OnInit {
 
   protected readonly visibleProducts = computed(() => {
     const category = this.selectedCategory();
-    const products = this.products()
-      .filter(
-        (product, index, products) =>
-          products.findIndex(p => p.name === product.name) === index
+    console.log("qxsqw",this.products());
+    const productsByName = new Map<string, Product>();
 
-      )
-    ;
+    for (const product of this.products()) {
+      const selectedProduct = productsByName.get(product.name);
+
+      if (!selectedProduct || (!selectedProduct.productImage.length && product.productImage.length)) {
+        productsByName.set(product.name, product);
+      }
+    }
+
+    const products = [...productsByName.values()];
     const newProducts =
       category === 'All'
         ? products
@@ -83,8 +88,26 @@ export class CataloguePage implements OnInit {
   protected readonly selectedProducts = signal<Product[] | null>(null);
 
   protected openPopup(product: Product): void {
+    const matchingProducts = this.products().filter(
+      (candidate) => candidate.name === product.name,
+    );
+    const productImages = [
+      ...new Map(
+        matchingProducts
+          .flatMap((candidate) => candidate.productImage)
+          .map((image) => [image.id, image]),
+      ).values(),
+    ];
+    const clickedProductFirst = [
+      product,
+      ...matchingProducts.filter((candidate) => candidate.id !== product.id),
+    ];
+
     this.selectedProducts.set(
-      this.products().filter((candidate) => candidate.name === product.name),
+      clickedProductFirst.map((candidate) => ({
+        ...candidate,
+        productImage: productImages,
+      })),
     );
   }
 

@@ -1,5 +1,6 @@
 import { Component, computed, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
 import { Product } from '../../core/interfaces/Product';
+import { ProductImage } from '../../core/interfaces/ProductImage';
 import { CartButtonComponent } from '../cartButton/CartButton';
 
 @Component({
@@ -12,6 +13,7 @@ export class PopupShopPage implements OnChanges {
 
   protected readonly currentColor = signal('');
   protected readonly currentSize = signal('');
+  protected readonly selectedImage = signal<ProductImage | null>(null);
 
 
   protected readonly colors = computed(() =>
@@ -41,7 +43,15 @@ export class PopupShopPage implements OnChanges {
       const product = this.products[0];
       this.currentColor.set(product?.color ?? '');
       this.currentSize.set(product?.size ?? '');
+      this.selectedImage.set(product?.productImage[0] ?? null);
     }
+
+  }
+
+
+
+  protected selectImage(image: ProductImage): void {
+    this.selectedImage.set(image);
   }
 
   protected select_color(color: string): void {

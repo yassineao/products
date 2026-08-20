@@ -4,7 +4,7 @@
     <div class="flex flex-col gap-8 md:flex-row md:items-start lg:gap-12">
       <div class="min-w-0 md:flex-1">
         <div class="mb-3 h-[320px] overflow-hidden rounded-[2rem] bg-terracotta/10 shadow-lg sm:h-[420px] lg:h-[500px]">
-          @if (product.productImage[0]; as image) {
+          @if (selectedImage(); as image) {
             <img
               class="h-full w-full object-cover transition duration-500 hover:scale-105" [src]="image.signedUrl"
               [alt]="image.altText || product.name"
@@ -16,13 +16,23 @@
         </div>
         <div class="mb-5 flex snap-x gap-3 overflow-x-auto pb-3">
           @for (productImage of product.productImage; track productImage.id) {
-            <img
-              class="h-20 w-20 flex-none snap-start rounded-xl border-2 border-transparent object-cover shadow-sm transition hover:border-terracotta sm:h-24 sm:w-24"
-              [src]="productImage.signedUrl"
-              [alt]="productImage.altText || product.name"
-              [width]="productImage.width"
-              [height]="productImage.height"
-            />
+            <button
+              type="button"
+              class="h-20 w-20 flex-none cursor-pointer snap-start overflow-hidden rounded-xl border-2 shadow-sm transition hover:border-terracotta sm:h-24 sm:w-24"
+              [class.border-terracotta]="selectedImage()?.id === productImage.id"
+              [class.border-transparent]="selectedImage()?.id !== productImage.id"
+              [attr.aria-label]="'Show ' + (productImage.altText || product.name)"
+              [attr.aria-pressed]="selectedImage()?.id === productImage.id"
+              (click)="selectImage(productImage)"
+            >
+              <img
+                class="h-full w-full object-cover"
+                [src]="productImage.signedUrl"
+                [alt]="productImage.altText || product.name"
+                [width]="productImage.width"
+                [height]="productImage.height"
+              />
+            </button>
           }
         </div>
 
