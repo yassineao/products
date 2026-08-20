@@ -1,0 +1,106 @@
+<section class="relative isolate min-h-[calc(100dvh-104px)] overflow-hidden bg-ivory px-5 py-12 text-dark-brown sm:px-8 sm:py-16 lg:py-20">
+  <div class="pointer-events-none absolute -top-36 -right-28 size-96 rounded-full bg-terracotta/15 blur-3xl" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -bottom-48 -left-28 size-[30rem] rounded-full bg-warm-gold/15 blur-3xl" aria-hidden="true"></div>
+
+  <div class="relative mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-warm-gold/30 bg-white/70 shadow-2xl shadow-dark-brown/10 backdrop-blur-sm lg:grid-cols-[0.9fr_1.1fr]">
+    <div class="relative hidden min-h-[620px] overflow-hidden bg-moroccan-green p-12 text-ivory lg:flex lg:flex-col lg:justify-between">
+      <div class="absolute inset-0 opacity-20" aria-hidden="true">
+        <div class="absolute top-12 -left-12 size-64 rotate-45 rounded-[4rem] border border-warm-gold"></div>
+        <div class="absolute right-10 bottom-12 size-52 rotate-12 rounded-full border border-warm-gold"></div>
+      </div>
+
+      <div class="relative">
+        <span class="inline-flex size-12 items-center justify-center rounded-full border border-warm-gold/60 bg-ivory/10 text-warm-gold">
+          <svg class="size-5 fill-none stroke-current stroke-[1.8]" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 5 6v5c0 4.6 2.9 8.3 7 10 4.1-1.7 7-5.4 7-10V6l-7-3Z" />
+            <path stroke-linecap="round" d="M9.5 12.2 11.2 14l3.7-4" />
+          </svg>
+        </span>
+        <p class="mt-6 text-xs font-bold tracking-[0.25em] text-warm-gold uppercase">Private access</p>
+        <h1 class="mt-4 max-w-sm font-serif text-5xl leading-tight font-semibold">The Maison, behind the scenes.</h1>
+      </div>
+
+      <p class="relative max-w-sm text-sm leading-7 text-ivory/65">This area is reserved for authorised Maison Atlas team members. Every sign-in is protected by the secure admin service.</p>
+    </div>
+
+    <div class="flex min-h-[560px] items-center p-7 sm:p-12 lg:p-16">
+      @if (authenticatedUser(); as user) {
+        <div class="w-full text-center" role="status">
+          <span class="mx-auto grid size-16 place-items-center rounded-full bg-moroccan-green text-ivory shadow-lg shadow-moroccan-green/20">
+            <svg class="size-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+            </svg>
+          </span>
+          <p class="mt-7 text-xs font-bold tracking-[0.22em] text-burgundy uppercase">Access granted</p>
+          <h2 class="mt-3 font-serif text-4xl font-semibold text-moroccan-green">Welcome, {{ user.name }}.</h2>
+          <p class="mt-3 text-sm leading-6 text-dark-brown/60">You are signed in as {{ user.email }}.</p>
+          <span class="mt-5 inline-flex rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-xs font-bold tracking-wider text-burgundy uppercase">{{ user.role }}</span>
+          <button class="mt-9 block w-full cursor-pointer rounded-full border border-moroccan-green px-6 py-3.5 text-sm font-bold text-moroccan-green transition hover:bg-moroccan-green hover:text-ivory focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold" type="button" (click)="signOut()">Sign out</button>
+        </div>
+      } @else {
+        <div class="w-full">
+          <p class="text-xs font-bold tracking-[0.22em] text-burgundy uppercase">Administration</p>
+          <h1 class="mt-3 font-serif text-4xl font-semibold text-moroccan-green sm:text-5xl">Welcome back.</h1>
+          <p class="mt-3 text-sm leading-6 text-dark-brown/60">Sign in with your administrator credentials to continue.</p>
+
+          <form class="mt-9" [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+            <label class="block text-sm font-semibold" for="admin-email">Email address</label>
+            <div class="relative mt-2">
+              <svg class="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 fill-none stroke-dark-brown/35 stroke-[1.7]" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4zM4 7l8 6 8-6" />
+              </svg>
+              <input id="admin-email" class="w-full rounded-xl border bg-ivory py-3.5 pr-4 pl-12 text-base outline-none transition placeholder:text-dark-brown/30 focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" [class.border-terracotta]="loginForm.controls.email.invalid && loginForm.controls.email.touched" [class.border-warm-gold]="loginForm.controls.email.valid || loginForm.controls.email.untouched" type="email" formControlName="email" autocomplete="username" placeholder="admin@maisonatlas.com" />
+            </div>
+            @if (loginForm.controls.email.touched && loginForm.controls.email.hasError('required')) {
+              <p class="mt-2 text-sm text-burgundy">Enter your email address.</p>
+            } @else if (loginForm.controls.email.touched && loginForm.controls.email.hasError('email')) {
+              <p class="mt-2 text-sm text-burgundy">Enter a valid email address.</p>
+            }
+
+            <div class="mt-6 flex items-center justify-between">
+              <label class="text-sm font-semibold" for="admin-password">Password</label>
+            </div>
+            <div class="relative mt-2">
+              <svg class="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 fill-none stroke-dark-brown/35 stroke-[1.7]" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <path stroke-linecap="round" d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
+              <input id="admin-password" class="w-full rounded-xl border bg-ivory py-3.5 pr-14 pl-12 text-base outline-none transition placeholder:text-dark-brown/30 focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" [class.border-terracotta]="loginForm.controls.password.invalid && loginForm.controls.password.touched" [class.border-warm-gold]="loginForm.controls.password.valid || loginForm.controls.password.untouched" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Enter your password" />
+              <button class="absolute top-1/2 right-3 grid size-9 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-dark-brown/45 transition hover:bg-warm-gold/15 hover:text-moroccan-green focus-visible:outline-2 focus-visible:outline-warm-gold" type="button" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword()" (click)="togglePasswordVisibility()">
+                @if (showPassword()) {
+                  <svg class="size-5 fill-none stroke-current stroke-[1.7]" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9.9 4.2A9.8 9.8 0 0 1 12 4c5.5 0 9 6 9 6a15.6 15.6 0 0 1-2.1 2.8M6.6 6.6C4.3 8.1 3 10 3 10s3.5 6 9 6c1 0 1.9-.2 2.7-.5" /></svg>
+                } @else {
+                  <svg class="size-5 fill-none stroke-current stroke-[1.7]" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" /><circle cx="12" cy="12" r="2.5" /></svg>
+                }
+              </button>
+            </div>
+            @if (loginForm.controls.password.touched && loginForm.controls.password.hasError('required')) {
+              <p class="mt-2 text-sm text-burgundy">Enter your password.</p>
+            } @else if (loginForm.controls.password.touched && loginForm.controls.password.hasError('minlength')) {
+              <p class="mt-2 text-sm text-burgundy">Password must be at least 6 characters.</p>
+            }
+
+            @if (errorMessage(); as message) {
+              <div class="mt-6 flex gap-3 rounded-xl border border-terracotta/35 bg-terracotta/10 p-4 text-sm leading-6 text-burgundy" role="alert">
+                <svg class="mt-0.5 size-5 shrink-0 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" d="M12 8v5m0 3h.01" /></svg>
+                <p>{{ message }}</p>
+              </div>
+            }
+
+            <button class="mt-7 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-moroccan-green px-6 py-3.5 text-sm font-bold text-ivory shadow-lg shadow-moroccan-green/15 transition hover:-translate-y-0.5 hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0 motion-reduce:transition-none" type="submit" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="size-4 animate-spin rounded-full border-2 border-ivory/30 border-t-ivory" aria-hidden="true"></span>
+                Signing in…
+              } @else {
+                Sign in securely
+                <span aria-hidden="true">→</span>
+              }
+            </button>
+          </form>
+
+          <p class="mt-7 text-center text-xs leading-5 text-dark-brown/45">Authorised personnel only. Contact the site owner if you need access.</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>

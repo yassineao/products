@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environment';
 import { LoginResponse, UserRequest, UserResponse } from '../../interfaces/User';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,17 +11,19 @@ export class UserService {
   private http: HttpClient = inject(HttpClient);
   private apiUrl: string = environment.apiUrl;
 
-  login(user: UserRequest): void {
-    this.http
+  login(user: UserRequest): Observable<LoginResponse> {
+    return this.http
       .post<LoginResponse>(`${this.apiUrl}/user/login`, user, {
         withCredentials: true,
       })
-      .subscribe(({ accessToken, id, name, email, role }) => {
-        const authenticatedUser: UserResponse = { id, name, email, role };
+      .pipe(
+        tap(({ accessToken, id, name, email, role }) => {
+          const authenticatedUser: UserResponse = { id, name, email, role };
 
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('user', JSON.stringify(authenticatedUser));
-      });
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('user', JSON.stringify(authenticatedUser));
+        }),
+      );
   }
 
   logout(): void {
