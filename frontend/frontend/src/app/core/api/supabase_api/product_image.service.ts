@@ -11,13 +11,29 @@ export class ProductImageService {
   private http = inject(HttpClient);
   private apiUrl: string = environment.apiUrl;
 
-  uploadPicture = (productImage: ProductImage) => {
-    this.http.post(`${this.apiUrl}/product-image/upload`, productImage, {
+  uploadPicture(
+    productId: string,
+    file: File,
+    altText: string,
+    mainImage: boolean,
+  ): Observable<ProductImage> {
+    const formData = new FormData();
+    formData.append('productId', productId);
+    formData.append('file', file, file.name);
+    formData.append('altText', altText);
+    formData.append('mainImage', String(mainImage));
+
+    const accessToken =
+      typeof localStorage === 'undefined' ? null : localStorage.getItem('accessToken');
+
+    return this.http.post<ProductImage>(`${this.apiUrl}/product-image/upload`, formData, {
       withCredentials: true,
+      ...(accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {}),
     });
-  };
-  deletePicture = (productId: Number) => {
-    this.http.delete(`${this.apiUrl}/product-image/product/${productId}`);
+  }
+
+  deletePicture = (productId: string) => {
+    return this.http.delete(`${this.apiUrl}/product-image/product/${productId}`);
   };
   getProductImages(productId: string): Observable<ProductImage[]> {
     return this.http.get<ProductImage[]>(`${this.apiUrl}/product-image/product/${productId}`);

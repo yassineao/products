@@ -25,17 +25,168 @@
 
     <div class="flex min-h-[560px] items-center p-7 sm:p-12 lg:p-16">
       @if (authenticatedUser(); as user) {
-        <div class="w-full text-center" role="status">
-          <span class="mx-auto grid size-16 place-items-center rounded-full bg-moroccan-green text-ivory shadow-lg shadow-moroccan-green/20">
-            <svg class="size-7 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
-            </svg>
-          </span>
-          <p class="mt-7 text-xs font-bold tracking-[0.22em] text-burgundy uppercase">Access granted</p>
-          <h2 class="mt-3 font-serif text-4xl font-semibold text-moroccan-green">Welcome, {{ user.name }}.</h2>
-          <p class="mt-3 text-sm leading-6 text-dark-brown/60">You are signed in as {{ user.email }}.</p>
-          <span class="mt-5 inline-flex rounded-full border border-warm-gold/40 bg-warm-gold/10 px-4 py-2 text-xs font-bold tracking-wider text-burgundy uppercase">{{ user.role }}</span>
-          <button class="mt-9 block w-full cursor-pointer rounded-full border border-moroccan-green px-6 py-3.5 text-sm font-bold text-moroccan-green transition hover:bg-moroccan-green hover:text-ivory focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold" type="button" (click)="signOut()">Sign out</button>
+        <div class="w-full">
+          <div class="flex items-start justify-between gap-5 border-b border-warm-gold/25 pb-6">
+            <div>
+              <p class="text-xs font-bold tracking-[0.22em] text-burgundy uppercase">Product management</p>
+              <h2 class="mt-2 font-serif text-3xl font-semibold text-moroccan-green">Add a product</h2>
+              <p class="mt-2 text-sm text-dark-brown/55">Signed in as {{ user.name }} · {{ user.role }}</p>
+            </div>
+            <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <a class="rounded-full bg-moroccan-green px-4 py-2 text-center text-xs font-bold text-ivory no-underline shadow-md shadow-moroccan-green/15 transition hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warm-gold" routerLink="/admin/products">Manage products</a>
+              <button class="cursor-pointer rounded-full border border-moroccan-green px-4 py-2 text-xs font-bold text-moroccan-green transition hover:bg-moroccan-green hover:text-ivory focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warm-gold" type="button" (click)="signOut()">Sign out</button>
+            </div>
+          </div>
+
+          <form class="mt-7 space-y-5" [formGroup]="productForm" (ngSubmit)="addProduct()" novalidate>
+            <div>
+              <label class="block text-sm font-semibold" for="product-name">Product name</label>
+              <input id="product-name" class="mt-2 w-full rounded-xl border border-warm-gold bg-ivory px-4 py-3 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" type="text" formControlName="name" placeholder="Handwoven Atlas caftan" />
+              @if (productForm.controls.name.touched && productForm.controls.name.invalid) {
+                <p class="mt-1.5 text-sm text-burgundy">Enter a product name.</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold" for="product-description">Description</label>
+              <textarea id="product-description" class="mt-2 min-h-24 w-full resize-y rounded-xl border border-warm-gold bg-ivory px-4 py-3 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" formControlName="description" placeholder="Describe the materials, fit, and craftsmanship"></textarea>
+              @if (productForm.controls.description.touched && productForm.controls.description.invalid) {
+                <p class="mt-1.5 text-sm text-burgundy">Enter a product description.</p>
+              }
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-semibold" for="product-price">Price</label>
+                <div class="relative mt-2">
+                  <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-dark-brown/45">€</span>
+                  <input id="product-price" class="w-full rounded-xl border border-warm-gold bg-ivory py-3 pr-4 pl-9 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" type="number" min="0.01" step="0.01" formControlName="price" />
+                </div>
+                @if (productForm.controls.price.touched && productForm.controls.price.invalid) {
+                  <p class="mt-1.5 text-sm text-burgundy">Enter a price greater than zero.</p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold" for="product-quantity">Quantity</label>
+                <input id="product-quantity" class="mt-2 w-full rounded-xl border border-warm-gold bg-ivory px-4 py-3 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" type="number" min="0" step="1" formControlName="quantity" />
+                @if (productForm.controls.quantity.touched && productForm.controls.quantity.invalid) {
+                  <p class="mt-1.5 text-sm text-burgundy">Enter a quantity of zero or more.</p>
+                }
+                <p class="mt-1.5 text-xs text-dark-brown/45">This stock quantity is applied to each variant.</p>
+              </div>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-semibold" for="product-sizes">Sizes</label>
+                <input id="product-sizes" class="mt-2 w-full rounded-xl border border-warm-gold bg-ivory px-4 py-3 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" type="text" formControlName="sizes" placeholder="S, M, L, XL" />
+                <p class="mt-1.5 text-xs text-dark-brown/45">Separate sizes with commas.</p>
+                @if (productForm.controls.sizes.touched && productForm.controls.sizes.invalid) {
+                  <p class="mt-1.5 text-sm text-burgundy">Enter at least one size.</p>
+                }
+              </div>
+
+              <div>
+                <span class="block text-sm font-semibold">Colors</span>
+                <div class="mt-2 flex flex-wrap gap-2" aria-label="Common color palette">
+                  @for (color of commonColors; track color) {
+                    <button class="size-8 cursor-pointer rounded-full border border-dark-brown/20 shadow-sm transition hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warm-gold" type="button" [style.backgroundColor]="color" [class.ring-2]="selectedColors().includes(color)" [class.ring-moroccan-green]="selectedColors().includes(color)" [attr.aria-label]="'Add color ' + color" [attr.aria-pressed]="selectedColors().includes(color)" [title]="color" (click)="addColor(color)"></button>
+                  }
+                </div>
+                <div class="mt-3 flex gap-2">
+                  <input id="product-color-picker" class="h-11 w-16 cursor-pointer rounded-lg border border-warm-gold bg-ivory p-1" type="color" formControlName="colorPicker" aria-label="Choose a custom color" />
+                  <button class="flex-1 cursor-pointer rounded-full border border-moroccan-green px-4 py-2 text-xs font-bold text-moroccan-green transition hover:bg-moroccan-green hover:text-ivory" type="button" (click)="addColor()">Add custom color</button>
+                </div>
+                @if (selectedColors().length > 0) {
+                  <div class="mt-3 flex flex-wrap gap-2" aria-label="Selected colors">
+                    @for (color of selectedColors(); track color) {
+                      <button class="flex cursor-pointer items-center gap-2 rounded-full border border-warm-gold/40 bg-white px-2.5 py-1.5 font-mono text-xs transition hover:border-terracotta" type="button" [attr.aria-label]="'Remove color ' + color" (click)="removeColor(color)">
+                        <span class="size-4 rounded-full border border-dark-brown/20" [style.backgroundColor]="color" aria-hidden="true"></span>
+                        {{ color }} <span class="text-burgundy" aria-hidden="true">×</span>
+                      </button>
+                    }
+                  </div>
+                }
+                @if (colorsTouched() && selectedColors().length === 0) {
+                  <p class="mt-1.5 text-sm text-burgundy">Choose at least one color.</p>
+                }
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-moroccan-green/20 bg-moroccan-green/5 px-4 py-3 text-xs leading-5 text-dark-brown/60">
+              Every size and color combination becomes a separate product. For example: <span class="font-mono font-semibold text-moroccan-green">Product name [M]#A52A2A</span>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-semibold" for="product-category">Category</label>
+                <select id="product-category" class="mt-2 w-full rounded-xl border border-warm-gold bg-ivory px-4 py-3 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" formControlName="categoryId" [disabled]="categoriesLoading()">
+                  <option value="">{{ categoriesLoading() ? 'Loading categories…' : 'Choose a category' }}</option>
+                  @for (category of categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+                @if (productForm.controls.categoryId.touched && productForm.controls.categoryId.invalid) {
+                  <p class="mt-1.5 text-sm text-burgundy">Choose a category.</p>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold" for="product-tags">Tags</label>
+                <input id="product-tags" class="mt-2 w-full rounded-xl border border-warm-gold bg-ivory px-4 py-3 text-base outline-none transition focus:border-moroccan-green focus:ring-3 focus:ring-moroccan-green/10" type="text" formControlName="tags" placeholder="new, handmade, summer" />
+                <p class="mt-1.5 text-xs text-dark-brown/45">Separate tags with commas.</p>
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-sm font-semibold">Product images</span>
+              <label class="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-warm-gold bg-warm-gold/5 px-5 py-6 text-center transition hover:border-moroccan-green hover:bg-moroccan-green/5">
+                <svg class="size-7 fill-none stroke-moroccan-green stroke-[1.7]" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5" /></svg>
+                <span class="mt-2 text-sm font-bold text-moroccan-green">Choose product images</span>
+                <span class="mt-1 text-xs text-dark-brown/45">JPG, PNG, or GIF · multiple images · up to 10 MB each</span>
+                <input class="sr-only" type="file" accept="image/jpeg,image/png,image/gif" multiple (change)="selectImages($event)" />
+              </label>
+
+              @if (selectedImages().length > 0) {
+                <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  @for (image of selectedImages(); track image.previewUrl; let first = $first) {
+                    <div class="group relative aspect-square overflow-hidden rounded-xl border border-warm-gold/35 bg-ivory">
+                      <img class="size-full object-cover" [src]="image.previewUrl" [alt]="image.file.name" />
+                      @if (first) {
+                        <span class="absolute bottom-2 left-2 rounded-full bg-moroccan-green px-2 py-1 text-[10px] font-bold text-ivory uppercase">Main</span>
+                      }
+                      <button class="absolute top-2 right-2 grid size-7 cursor-pointer place-items-center rounded-full bg-dark-brown/75 text-sm text-white opacity-90 transition hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-white" type="button" [attr.aria-label]="'Remove ' + image.file.name" (click)="removeImage(image)">×</button>
+                    </div>
+                  }
+                </div>
+              }
+              @if (imageSelectionError(); as message) {
+                <p class="mt-2 text-sm text-burgundy">{{ message }}</p>
+              }
+            </div>
+
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-warm-gold/35 bg-warm-gold/5 px-4 py-3 text-sm font-semibold">
+              <input class="size-4 accent-moroccan-green" type="checkbox" formControlName="active" />
+              Make this product visible in the shop
+            </label>
+
+            @if (productErrorMessage(); as message) {
+              <div class="rounded-xl border border-terracotta/35 bg-terracotta/10 p-4 text-sm text-burgundy" role="alert">{{ message }}</div>
+            }
+            @if (productSuccessMessage(); as message) {
+              <div class="rounded-xl border border-moroccan-green/30 bg-moroccan-green/10 p-4 text-sm text-moroccan-green" role="status">{{ message }}</div>
+            }
+
+            <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-moroccan-green px-6 py-3.5 text-sm font-bold text-ivory shadow-lg shadow-moroccan-green/15 transition hover:-translate-y-0.5 hover:bg-burgundy focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-warm-gold disabled:cursor-wait disabled:opacity-65 disabled:hover:translate-y-0" type="submit" [disabled]="productSubmitting() || categoriesLoading() || categories().length === 0">
+              @if (productSubmitting()) {
+                <span class="size-4 animate-spin rounded-full border-2 border-ivory/30 border-t-ivory" aria-hidden="true"></span>
+                Adding product…
+              } @else {
+                Add product
+              }
+            </button>
+          </form>
         </div>
       } @else {
         <div class="w-full">

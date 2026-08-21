@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,13 @@ export const routes: Routes = [
     path: 'admin',
     title: 'Admin sign in | Maison Atlas',
     loadComponent: () => import('./pages/admin/Admin').then((module) => module.AdminPage),
+  },
+  {
+    path: 'admin/products',
+    title: 'Manage products | Maison Atlas',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/admin-products/AdminProducts').then((module) => module.AdminProductsPage),
   },
   { path: '**', redirectTo: '' },
 ];

@@ -15,7 +15,7 @@ import {
 import { environment } from '../../../../../environment';
 import { ProductImageService } from '../supabase_api/product_image.service';
 
-interface ProductRequest {
+export interface ProductCreateRequest {
   name: string;
   description: string;
   price: number;
@@ -48,15 +48,7 @@ export class ProductsService {
 
         return forkJoin(
           products.map((product) => {
-            const shouldLoadImages = product.name.trim().endsWith('@');
             const parsedProduct = this.parseProductOptions(product);
-            if (!shouldLoadImages) {
-              return of({
-                ...parsedProduct,
-                productImage: [],
-              });
-            }
-
             return this.productImageService.getProductImages(product.id).pipe(
               map((images) => ({
                 ...parsedProduct,
@@ -127,7 +119,7 @@ export class ProductsService {
     };
   }
 
-  private toProductRequest(product: Product): ProductRequest {
+  private toProductRequest(product: Product): ProductCreateRequest {
     return {
       name: product.name,
       description: product.description,
@@ -144,27 +136,63 @@ export class ProductsService {
     this.productsLoaded.set(false);
   }
 
-  addProduct(product: Product): Observable<void> {
+  private authenticatedRequestOptions(): {
+    withCredentials: true;
+    headers?: Record<string, string>;
+  } {
+    const accessToken =
+      typeof localStorage === 'undefined' ? null : localStorage.getItem('accessToken');
+
+    return {
+      withCredentials: true,
+      ...(accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {}),
+    };
+  }
+
+  addProduct(product: ProductCreateRequest): Observable<void> {
+    return this.addProducts([product]);
+  }
+
+  addProducts(products: ProductCreateRequest[]): Observable<void> {
     return this.httpClient
-      .post<void>(`${this.apiUrl}/product`, [this.toProductRequest(product)], {
-        withCredentials: true,
-      })
+      .post<void>(`${this.apiUrl}/product`, products, this.authenticatedRequestOptions())
       .pipe(tap(() => this.invalidateProductsCache()));
+  }
+
+  addProductsAndReturnCreated(products: ProductCreateRequest[]): Observable<Product[]> {
+    const requestedNames = new Set(products.map((product) => product.name));
+
+    return this.httpClient.get<Product[]>(`${this.apiUrl}/product`).pipe(
+      map((existingProducts) => new Set(existingProducts.map((product) => product.id))),
+      switchMap((existingIds) =>
+        this.httpClient
+          .post<void>(`${this.apiUrl}/product`, products, this.authenticatedRequestOptions())
+          .pipe(
+            tap(() => this.invalidateProductsCache()),
+            switchMap(() => this.httpClient.get<Product[]>(`${this.apiUrl}/product`)),
+            map((allProducts) =>
+              allProducts.filter(
+                (product) => !existingIds.has(product.id) && requestedNames.has(product.name),
+              ),
+            ),
+          ),
+      ),
+    );
   }
 
   updateProduct(product: Product): Observable<void> {
     return this.httpClient
-      .patch<void>(`${this.apiUrl}/product/${product.id}`, this.toProductRequest(product), {
-        withCredentials: true,
-      })
+      .patch<void>(
+        `${this.apiUrl}/product/${product.id}`,
+        this.toProductRequest(product),
+        this.authenticatedRequestOptions(),
+      )
       .pipe(tap(() => this.invalidateProductsCache()));
   }
 
   deleteProduct(productId: string): Observable<void> {
     return this.httpClient
-      .delete<void>(`${this.apiUrl}/product/${productId}`, {
-        withCredentials: true,
-      })
+      .delete<void>(`${this.apiUrl}/product/${productId}`, this.authenticatedRequestOptions())
       .pipe(tap(() => this.invalidateProductsCache()));
   }
 }
