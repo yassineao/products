@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Configuration
@@ -104,18 +105,16 @@ public class SecurityConfig {
         List<String> allowedOrigins = new ArrayList<>(List.of(
                 "http://localhost:3000",
                 "http://localhost:4200",
-                "http://localhost:5173",
-                productionUrl
+                "http://localhost:5173"
         ));
 
+        addAllowedOrigin(allowedOrigins, productionUrl);
+
         for (String origin : configuredAllowedOrigins.split(",")) {
-            String trimmedOrigin = origin.trim();
-            if (!trimmedOrigin.isBlank()) {
-                allowedOrigins.add(trimmedOrigin);
-            }
+            addAllowedOrigin(allowedOrigins, origin);
         }
 
-        cfg.setAllowedOriginPatterns(allowedOrigins);
+        cfg.setAllowedOriginPatterns(new ArrayList<>(new LinkedHashSet<>(allowedOrigins)));
 
         cfg.setAllowedMethods(List.of(
                 "GET",
@@ -135,6 +134,16 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", cfg);
 
         return source;
+    }
+
+    private static void addAllowedOrigin(List<String> allowedOrigins, String origin) {
+        String normalizedOrigin = origin == null ? "" : origin.trim();
+        while (normalizedOrigin.endsWith("/")) {
+            normalizedOrigin = normalizedOrigin.substring(0, normalizedOrigin.length() - 1);
+        }
+        if (!normalizedOrigin.isBlank()) {
+            allowedOrigins.add(normalizedOrigin);
+        }
     }
 
 }
